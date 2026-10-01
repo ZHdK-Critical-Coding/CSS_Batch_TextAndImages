@@ -1,0 +1,5 @@
+Glacier
+
+The ice moves about 30 cm per day – too slow to see, too fast to ignore. Between 1850 and today the glacier lost more than 60% of its volume.
+
+This text comes from source/glacier/text.txt. Every empty line starts a new paragraph. Special characters like & % # $ _ { } and umlauts (äöü) are printed as they are.

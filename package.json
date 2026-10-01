@@ -1,0 +1,14 @@
+{
+  "name": "css-batch-textandimages",
+  "version": "1.0.0",
+  "description": "Batch-creates one PDF per source folder from HTML and CSS",
+  "main": "build.js",
+  "private": true,
+  "scripts": {
+    "build": "node build.js"
+  },
+  "author": "ZHdK Critical Coding",
+  "dependencies": {
+    "puppeteer": "^24.0.0"
+  }
+}

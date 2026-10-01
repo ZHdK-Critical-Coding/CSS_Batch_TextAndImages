@@ -1,0 +1,5 @@
+Harbour
+
+Containers, cranes and gulls: the harbour never sleeps. Ships arrive at night, their cargo is unloaded before sunrise.
+
+Each folder in source/ becomes one PDF. Add a folder, run the script again, and a new PDF appears in output/.

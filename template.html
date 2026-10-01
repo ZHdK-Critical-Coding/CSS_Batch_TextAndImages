@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{title}}</title>
+  <!-- paths are relative to output/, where build.js writes the HTML -->
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <!-- page 1: the text -->
+  <section class="text">
+    <h1>{{title}}</h1>
+    {{body}}
+  </section>
+
+  <!-- one page per image -->
+  {{images}}
+</body>
+</html>
