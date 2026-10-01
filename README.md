@@ -2,9 +2,9 @@
 
 [Deutsch](README_DE.md)
 
-Turns every folder in `source/` into its own PDF: the text from `text.txt`
-on the first page, followed by every image in the folder on a page of its
-own. A Node.js script fills an HTML template, and a headless Chrome
+Turns all folders in `source/` into one PDF: every folder starts on a new
+page with the text from `text.txt`, followed by every image in the folder
+on a page of its own. A Node.js script fills an HTML template, and a headless Chrome
 (controlled with [Puppeteer](https://pptr.dev)) prints it to PDF. The
 layout is plain CSS with print rules (`@page`, `break-before`), so
 anything you know from web design works on paper too.
@@ -32,7 +32,7 @@ License: MIT
 
 ## How to Run
 
-The source material lies in `source/`, one folder per document:
+The source material lies in `source/`, one folder per section:
 
 ```
 source/
@@ -50,35 +50,38 @@ In the repository folder, run
 npm run build
 ```
 
-The script creates `output/glacier.pdf`, `output/harbour.pdf` … (A4, 20 mm
-margins). Replace the folders in `source/` with your own material and run
-it again. Existing PDFs are overwritten.
+The script creates `output/document.pdf` (A4, 20 mm margins) with the
+folders in alphabetical order. Replace the folders in `source/` with your own material and run
+it again. An existing PDF is overwritten.
 
-Next to every PDF lies the generated HTML file (`output/glacier.html`).
+Next to the PDF lies the generated HTML file (`output/document.html`).
 Open it in Chrome to work on `style.css`: reload after each change and use
 *Print* (Cmd/Ctrl+P) to see the pages – no need to run the script every
 time.
 
 ## Coding Help
 
-- **`template.html`**: the page structure with three placeholders:
-  `{{title}}`, `{{body}}` and `{{images}}`. The stylesheet is linked as
+- **`template.html`**: the document around the content, with the
+  placeholder `{{items}}`. The stylesheet is linked as
   `../style.css`, because the generated HTML is saved in `output/`.
 - **`style.css`**: the layout. `@page` sets paper size and margins (try
-  `size: A5` or `size: 200mm 200mm`). `.image-page` starts every image on
+  `size: A5` or `size: 200mm 200mm`). `.item + .item` starts every folder
+  after the first on a new page. `.image-page` starts every image on
   a new page with `break-before: page`; its height of 257 mm is A4 minus
   both margins. The image keeps its proportions with `max-width` /
   `max-height` and is centred with flexbox. Change the margin in `@page`
   and adjust the height of `.image-page` with it.
-- **`build.js` → `buildHtml()`**: reads `text.txt`; the first line is the
+- **`build.js` → `buildItem()`**: builds one `<section class="item">`
+  per folder. It reads `text.txt`; the first line is the
   title, the rest is split at empty lines into `<p>` paragraphs.
   `escapeHtml()` replaces `& < >`, so the text is printed as it is. The
   images (`jpg`, `jpeg`, `png`, sorted by name) become one
   `<div class="image-page">` each. Extend the regular expression
   `/\.(jpe?g|png)$/i` for other formats (e.g. `webp`, `gif`, `svg`).
 - **`build.js` → `main()`**: starts the browser once with
-  `puppeteer.launch()`, then for every folder writes the HTML, opens it
-  with `page.goto()` and saves it with `page.pdf()`.
+  `puppeteer.launch()`, lists the folders in `source/` (sorted by name), joins
+  their sections into `template.html`, writes the HTML, opens it with
+  `page.goto()` and saves it with `page.pdf()`.
   `preferCSSPageSize: true` uses the size from `@page`;
   `printBackground: true` keeps background colours and images, which
   browsers otherwise leave out when printing.

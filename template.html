@@ -2,18 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>{{title}}</title>
+  <title>Text and Images</title>
   <!-- paths are relative to output/, where build.js writes the HTML -->
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
-  <!-- page 1: the text -->
-  <section class="text">
-    <h1>{{title}}</h1>
-    {{body}}
-  </section>
-
-  <!-- one page per image -->
-  {{images}}
+  <!-- one section per folder in source/: title, text, one page per image -->
+  {{items}}
 </body>
 </html>

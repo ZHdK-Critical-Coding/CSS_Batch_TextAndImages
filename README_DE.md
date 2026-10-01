@@ -2,9 +2,9 @@
 
 [English](README.md)
 
-Macht aus jedem Ordner in `source/` ein eigenes PDF: der Text aus
-`text.txt` auf der ersten Seite, danach jedes Bild aus dem Ordner auf einer
-eigenen Seite. Ein Node.js-Script füllt eine HTML-Vorlage, und ein
+Macht aus allen Ordnern in `source/` ein PDF: jeder Ordner beginnt auf
+einer neuen Seite mit dem Text aus `text.txt`, danach folgt jedes Bild aus
+dem Ordner auf einer eigenen Seite. Ein Node.js-Script füllt eine HTML-Vorlage, und ein
 unsichtbares Chrome (gesteuert mit [Puppeteer](https://pptr.dev)) druckt sie
 als PDF. Das Layout ist reines CSS mit Druckregeln (`@page`,
 `break-before`); was man vom Webdesign kennt, funktioniert also auch auf
@@ -34,7 +34,7 @@ Lizenz: MIT
 
 ## Ausführen
 
-Das Ausgangsmaterial liegt in `source/`, ein Ordner pro Dokument:
+Das Ausgangsmaterial liegt in `source/`, ein Ordner pro Abschnitt:
 
 ```
 source/
@@ -52,37 +52,41 @@ Im Ordner des Repositorys ausführen:
 npm run build
 ```
 
-Das Script erzeugt `output/glacier.pdf`, `output/harbour.pdf` … (A4, 20 mm
-Rand). Die Ordner in `source/` durch eigenes Material ersetzen und das
-Script nochmals ausführen. Bestehende PDFs werden überschrieben.
+Das Script erzeugt `output/document.pdf` (A4, 20 mm Rand) mit den Ordnern
+in alphabetischer Reihenfolge. Die Ordner in `source/` durch eigenes Material ersetzen und das
+Script nochmals ausführen. Ein bestehendes PDF wird überschrieben.
 
-Neben jedem PDF liegt die erzeugte HTML-Datei (`output/glacier.html`).
+Neben dem PDF liegt die erzeugte HTML-Datei (`output/document.html`).
 Um an `style.css` zu arbeiten, diese in Chrome öffnen: nach jeder Änderung
 neu laden und mit *Drucken* (Cmd/Ctrl+P) die Seiten ansehen – ohne jedes
 Mal das Script auszuführen.
 
 ## Coding-Hilfe
 
-- **`template.html`**: der Seitenaufbau mit drei Platzhaltern:
-  `{{title}}`, `{{body}}` und `{{images}}`. Das Stylesheet ist als
+- **`template.html`**: das Dokument rund um den Inhalt, mit dem
+  Platzhalter `{{items}}`. Das Stylesheet ist als
   `../style.css` verlinkt, weil das erzeugte HTML in `output/` gespeichert
   wird.
 - **`style.css`**: das Layout. `@page` legt Papierformat und Ränder fest
   (z. B. `size: A5` oder `size: 200mm 200mm` ausprobieren).
+  `.item + .item` beginnt jeden Ordner nach dem ersten auf einer neuen
+  Seite.
   `.image-page` beginnt jedes Bild mit `break-before: page` auf einer neuen
   Seite; die Höhe von 257 mm ist A4 minus beide Ränder. Das Bild behält
   mit `max-width` / `max-height` seine Proportionen und wird mit Flexbox
   zentriert. Wer den Rand in `@page` ändert, passt die Höhe von
   `.image-page` mit an.
-- **`build.js` → `buildHtml()`**: liest `text.txt`; die erste Zeile ist
+- **`build.js` → `buildItem()`**: baut eine `<section class="item">`
+  pro Ordner. Es liest `text.txt`; die erste Zeile ist
   der Titel, der Rest wird bei Leerzeilen in `<p>`-Absätze aufgeteilt.
   `escapeHtml()` ersetzt `& < >`, damit der Text unverändert erscheint.
   Die Bilder (`jpg`, `jpeg`, `png`, nach Namen sortiert) werden zu je
   einem `<div class="image-page">`. Für andere Formate den regulären
   Ausdruck `/\.(jpe?g|png)$/i` erweitern (z. B. `webp`, `gif`, `svg`).
 - **`build.js` → `main()`**: startet den Browser einmal mit
-  `puppeteer.launch()`, schreibt dann für jeden Ordner das HTML, öffnet es
-  mit `page.goto()` und speichert es mit `page.pdf()`.
+  `puppeteer.launch()`, listet die Ordner in `source/` auf (nach Namen
+  sortiert), fügt ihre Abschnitte in `template.html` ein, schreibt das HTML,
+  öffnet es mit `page.goto()` und speichert es mit `page.pdf()`.
   `preferCSSPageSize: true` verwendet das Format aus `@page`;
   `printBackground: true` behält Hintergrundfarben und -bilder, die
   Browser beim Drucken sonst weglassen.

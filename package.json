@@ -1,7 +1,7 @@
 {
   "name": "css-batch-textandimages",
   "version": "1.0.0",
-  "description": "Batch-creates one PDF per source folder from HTML and CSS",
+  "description": "Batch-creates one PDF with all source folders from HTML and CSS",
   "main": "build.js",
   "private": true,
   "scripts": {

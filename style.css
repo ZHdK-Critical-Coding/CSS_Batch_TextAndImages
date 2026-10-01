@@ -22,6 +22,11 @@ p {
   hyphens: auto;
 }
 
+/* Every folder starts on a new page */
+.item + .item {
+  break-before: page;
+}
+
 /* Every image starts on a new page and fills the page area
    (A4 minus the margins: 170 × 257 mm) without being cropped */
 .image-page {

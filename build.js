@@ -12,8 +12,8 @@ function escapeHtml(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// Builds the HTML for one folder in source/
-function buildHtml(item) {
+// Builds the HTML for one folder in source/: a section with title, text and images
+function buildItem(item) {
   const folder = path.join(sourceDir, item);
 
   // text.txt: the first line is the title, an empty line starts a new paragraph
@@ -27,12 +27,13 @@ function buildHtml(item) {
     .filter((name) => /\.(jpe?g|png)$/i.test(name))
     .sort()
     .map((name) => `<div class="image-page"><img src="../source/${encodeURIComponent(item)}/${encodeURIComponent(name)}"></div>`)
-    .join('\n  ');
+    .join('\n    ');
 
-  return template
-    .replaceAll('{{title}}', escapeHtml(title))
-    .replace('{{body}}', body)
-    .replace('{{images}}', images);
+  return `<section class="item">
+    <h1>${escapeHtml(title)}</h1>
+    ${body}
+    ${images}
+  </section>`;
 }
 
 async function main() {
@@ -40,23 +41,23 @@ async function main() {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
+  // every folder in source/, sorted by name
   const items = fs.readdirSync(sourceDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name);
+    .map((entry) => entry.name)
+    .sort();
 
-  for (const item of items) {
-    // The HTML is kept in output/ – open it in a browser to check the layout
-    const htmlFile = path.join(outputDir, `${item}.html`);
-    fs.writeFileSync(htmlFile, buildHtml(item));
+  // The HTML is kept in output/ – open it in a browser to check the layout
+  const htmlFile = path.join(outputDir, 'document.html');
+  fs.writeFileSync(htmlFile, template.replace('{{items}}', items.map(buildItem).join('\n  ')));
 
-    await page.goto(pathToFileURL(htmlFile).href, { waitUntil: 'load' });
-    await page.pdf({
-      path: path.join(outputDir, `${item}.pdf`),
-      preferCSSPageSize: true, // use @page from style.css
-      printBackground: true,
-    });
-    console.log(`source/${item} -> output/${item}.pdf`);
-  }
+  await page.goto(pathToFileURL(htmlFile).href, { waitUntil: 'load' });
+  await page.pdf({
+    path: path.join(outputDir, 'document.pdf'),
+    preferCSSPageSize: true, // use @page from style.css
+    printBackground: true,
+  });
+  console.log('source/ -> output/document.pdf');
 
   await browser.close();
 }
