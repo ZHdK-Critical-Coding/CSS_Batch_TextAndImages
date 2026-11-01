@@ -12,15 +12,18 @@ function escapeHtml(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// Builds the HTML for one folder in source/: a section with title, text and images
+// Builds the HTML for one folder in source/: a section with text and images
 function buildItem(item) {
   const folder = path.join(sourceDir, item);
 
-  // text.txt: the first line is the title, an empty line starts a new paragraph
-  const lines = fs.readFileSync(path.join(folder, 'text.txt'), 'utf8').trim().split(/\r?\n/);
-  const title = lines[0];
-  const paragraphs = lines.slice(1).join('\n').trim().split(/\n\s*\n/);
-  const body = paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join('\n    ');
+  // text (optional): the first .txt file of the folder, whatever its name.
+  // The whole file is body text, an empty line starts a new paragraph.
+  const textFile = fs.readdirSync(folder).filter((name) => /\.txt$/i.test(name)).sort()[0];
+  let body = '';
+  if (textFile) {
+    const text = fs.readFileSync(path.join(folder, textFile), 'utf8').trim();
+    body = text.split(/\r?\n\s*\r?\n/).map((p) => `<p>${escapeHtml(p)}</p>`).join('\n    ');
+  }
 
   // all jpg/png files, sorted by name
   const images = fs.readdirSync(folder)
@@ -30,7 +33,6 @@ function buildItem(item) {
     .join('\n    ');
 
   return `<section class="item">
-    <h1>${escapeHtml(title)}</h1>
     ${body}
     ${images}
   </section>`;

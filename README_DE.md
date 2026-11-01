@@ -3,7 +3,7 @@
 [English](README.md)
 
 Macht aus allen Ordnern in `source/` ein PDF: jeder Ordner beginnt auf
-einer neuen Seite mit dem Text aus `text.txt`, danach folgt jedes Bild aus
+einer neuen Seite mit dem Text aus seiner `.txt`-Datei (optional, beliebiger Name), danach folgt jedes Bild aus
 dem Ordner auf einer eigenen Seite. Ein Node.js-Script füllt eine HTML-Vorlage, und ein
 unsichtbares Chrome (gesteuert mit [Puppeteer](https://pptr.dev)) druckt sie
 als PDF. Das Layout ist reines CSS mit Druckregeln (`@page`,
@@ -39,7 +39,8 @@ Das Ausgangsmaterial liegt in `source/`, ein Ordner pro Abschnitt:
 ```
 source/
   glacier/
-    text.txt     erste Zeile: Titel; eine Leerzeile beginnt einen neuen Absatz
+    text.txt     optional, beliebiger Name mit Endung .txt (die erste wird verwendet);
+                 eine Leerzeile beginnt einen neuen Absatz
     01.jpg       Bilder (jpg, png), in alphabetischer Reihenfolge gesetzt
     02.jpg
   harbour/
@@ -52,7 +53,7 @@ Im Ordner des Repositorys ausführen:
 npm run build
 ```
 
-Das Script erzeugt `output/document.pdf` (A4, 20 mm Rand) mit den Ordnern
+Das Script erzeugt `output/document.pdf` (A5, 12 mm Rand, randabfallende Bilder) mit den Ordnern
 in alphabetischer Reihenfolge. Die Ordner in `source/` durch eigenes Material ersetzen und das
 Script nochmals ausführen. Ein bestehendes PDF wird überschrieben.
 
@@ -68,17 +69,25 @@ Mal das Script auszuführen.
   `../style.css` verlinkt, weil das erzeugte HTML in `output/` gespeichert
   wird.
 - **`style.css`**: das Layout. `@page` legt Papierformat und Ränder fest
-  (z. B. `size: A5` oder `size: 200mm 200mm` ausprobieren).
+  (z. B. `size: A4` oder `size: 200mm 200mm` ausprobieren). Der Textbereich
+  ist um 3.75 pt nach unten verschoben, damit die erste Grundlinie wie in
+  der Typst- und der LaTeX-Version 16 pt unter dem 12-mm-Rand liegt.
+  `body` setzt Helvetica 14/16 pt, `p` Absätze im Blocksatz mit
+  Silbentrennung und einer Leerzeile (16 pt) dazwischen; `lang="de"` in
+  `template.html` wählt die deutsche Silbentrennung.
   `.item + .item` beginnt jeden Ordner nach dem ersten auf einer neuen
   Seite.
   `.image-page` beginnt jedes Bild mit `break-before: page` auf einer neuen
-  Seite; die Höhe von 257 mm ist A4 minus beide Ränder. Das Bild behält
-  mit `max-width` / `max-height` seine Proportionen und wird mit Flexbox
-  zentriert. Wer den Rand in `@page` ändert, passt die Höhe von
+  Seite; `page: image` gibt ihm die benannte Seite `@page image` ohne
+  Rand. Es ist genau so gross wie die Seite (148 × 210 mm bei A5), und
+  `object-fit: cover` skaliert das Bild so, dass es die Fläche ganz füllt;
+  was übersteht, wird abgeschnitten. Mit `object-fit: contain` erscheint
+  das ganze Bild. Wer das Papierformat ändert, passt die Grösse von
   `.image-page` mit an.
 - **`build.js` → `buildItem()`**: baut eine `<section class="item">`
-  pro Ordner. Es liest `text.txt`; die erste Zeile ist
-  der Titel, der Rest wird bei Leerzeilen in `<p>`-Absätze aufgeteilt.
+  pro Ordner. Es liest die erste `.txt`-Datei des Ordners
+  (gibt es keine, erhält der Ordner keinen Text) und teilt sie bei
+  Leerzeilen in `<p>`-Absätze auf.
   `escapeHtml()` ersetzt `& < >`, damit der Text unverändert erscheint.
   Die Bilder (`jpg`, `jpeg`, `png`, nach Namen sortiert) werden zu je
   einem `<div class="image-page">`. Für andere Formate den regulären
